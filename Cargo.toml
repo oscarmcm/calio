@@ -1,0 +1,19 @@
+[package]
+name = "calio"
+version = "1.0.0"
+edition = "2021"
+authors = ["Oscar Cortez <om.cortez.2010@gmail.com>"]
+license-file = "LICENSE"
+description = "iCalendar simple tui visulizer"
+readme = "README.md"
+documentation = "https://github.com/oscarmcm/calio"
+homepage = "https://github.com/oscarmcm/calio"
+repository = "https://github.com/oscarmcm/calio"
+keywords = ["cli", "tui", "icalendar", "calendar"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+anyhow = "1.0.71"
+clap = { version = "4.2.1", features = ["derive", "suggestions", "color"] }
+clap-stdin = "0.2.0"
+ical = "0.8.0"
