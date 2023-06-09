@@ -1,25 +1,12 @@
-use itertools::Itertools;
-use colored::*;
-use atty;
 use std::env;
-use std::fs;
-use std::io::{BufRead, BufReader, Read, stdin};
 use std::fs::File;
+use std::io::{BufReader};
 
-use Calio::Calendar;
-use Calio::Date;
-use Calio::Event;
-
-fn ics_file_calendar(file_path: &str) -> Calendar {
-    let file = File::open(file_path).unwrap();
-    let buf = BufReader::new(file);
-    Calendar::parse(buf).unwrap()
-}
-
-fn ics_std_calendar(input: &stdin) -> Calendar {
-    let buf = BufReader::new(input);
-    Calendar::parse(buf).unwrap()
-}
+use chrono::Duration;
+use colored::Colorize;
+use almanac::Calendar;
+use almanac::Date;
+use almanac::Event;
 
 fn print_day(date: Date) {
     println!("\n{}", date.format("%a %b %e %Y").green().bold())
@@ -106,46 +93,31 @@ fn print_events(events: impl Iterator<Item = Event>) {
 }
 
 
-fn output_lines<R: Read>(reader: R) {
-    let buffer = BufReader::new(reader);
-    //let reader = ical::PropertyParser::from_reader(buffer);
-    let reader = ical::IcalParser::new(buffer);
-    //for line in buffer.lines() {
-    for line in reader {
-        println!("{:?}", line);
-    }
-}
-
-
 fn main() {
-    let input = env::args().nth(1);
-    match input {
+    match env::args().nth(1) {
         Some(filename) => {
-            if ["-h", "help", "--help"].contains(&filename) {
-                println!("Print help")
-            } else {
-                let mut calendars = ics_file_calendar(&filename);
-            }
-            //output_lines(fs::File::open(filename).unwrap()),
-        },
-        None => {
-            if atty::is(atty::Stream::Stdin) {
-                println!("Missing Args")
+            if ["-h".to_string(), "help".to_string(), "--help".to_string()]
+                .contains(&filename.to_owned())
+            {
+                println!("Print help");
                 return;
             } else {
-                let buf = stdin();
-                let mut calendars = ics_std_calendar(buf);
+                let file = File::open(filename).unwrap();
+                let buf = BufReader::new(file);
+                let calendars = Calendar::parse(buf).unwrap();
+                print_events(calendars.iter())
             }
-            //output_lines(std::io::stdin()),
+        }
+        None => {
+            if atty::is(atty::Stream::Stdin) {
+                println!("Missing Args");
+                return;
+            } else {
+                let stdin = std::io::stdin();
+                let buf = BufReader::new(stdin);
+                let calendars = Calendar::parse(buf).unwrap();
+                print_events(calendars.iter())
+            }
         }
     };
-    let events = calendars
-        .iter()
-        .map(|c| c.iter())
-        .kmerge()
-        .skip_while(|e| e.end_date() < first)
-        .take_while(|e| e.start <= last);
-    print_events(events)
-
 }
-

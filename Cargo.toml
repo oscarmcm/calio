@@ -13,14 +13,15 @@ keywords = ["cli", "tui", "icalendar", "calendar"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-anyhow = "1.0.71"
 atty = "0.2.14"
 chrono = "0.4.26"
 chrono-tz = "0.8.2"
-clap = { version = "4.2.1", features = ["derive", "suggestions", "color"] }
-clap-stdin = "0.2.0"
 colored = "2.0.0"
-ical = "0.8.0"
-itertools = "0.10.5"
 serde = "1.0.164"
 serde_derive = "1.0.164"
+almanac = "0.4.0"
+
+[dependencies.ical]
+version = "0.8.0"
+default-features = false
+features = ["ical"]
