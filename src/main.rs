@@ -1,6 +1,8 @@
 use std::env;
 use std::fs::File;
-use std::io::{BufReader};
+use std::io::BufReader;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use chrono::Duration;
 use colored::Colorize;
@@ -92,32 +94,77 @@ fn print_events(events: impl Iterator<Item = Event>) {
     println!("");
 }
 
-
 fn main() {
-    match env::args().nth(1) {
-        Some(filename) => {
-            if ["-h".to_string(), "help".to_string(), "--help".to_string()]
-                .contains(&filename.to_owned())
-            {
-                println!("Print help");
-                return;
-            } else {
-                let file = File::open(filename).unwrap();
-                let buf = BufReader::new(file);
-                let calendars = Calendar::parse(buf).unwrap();
-                print_events(calendars.iter())
-            }
-        }
-        None => {
-            if atty::is(atty::Stream::Stdin) {
-                println!("Missing Args");
-                return;
-            } else {
-                let stdin = std::io::stdin();
-                let buf = BufReader::new(stdin);
-                let calendars = Calendar::parse(buf).unwrap();
-                print_events(calendars.iter())
-            }
-        }
+
+    let help_text: String = format!(r"
+{} 1.0.0
+Tiny CLI tool that helps to visualize iCal file content in the terminal.
+
+{}
+    [STDIN] | calio [OPTIONS]
+    calio [FILE_PATH] [OPTIONS]
+
+{}:
+    {}    Keep the app running and do not exit on stdout.
+    {}          Display this message and exit.
+
+{}:
+    cat ~/invite.ics | calio
+    calio ~/invite.ics --keep-alive
+", "calio".green(), "USAGE:".yellow(), "OPTIONS:".yellow(), "--keep-alive".green(), "--help".green(), "EXAMPLE".yellow());
+
+
+
+    let args: Vec<_> = env::args().collect();
+    let is_stdin_empty: bool = atty::is(atty::Stream::Stdin);
+    let mut keep_alive: bool = false;
+
+    if is_stdin_empty && args.len() < 2 {
+        // no args no stdin
+        println!("{}", "Not enough arguments suplied.".red());
+        println!("{}", help_text);
+        return;
     };
+
+    if !is_stdin_empty {
+        if args.len() >= 2 && args[1] != "--keep-alive".to_string() {
+            // with stdin with file
+            println!("{}", "Can't mix STDIN and FILE.".red());
+            println!("{}", help_text);
+            return;
+        };
+        if args.len() >= 1 {
+            keep_alive = args[args.len() - 1] == "--keep-alive".to_string();
+        };
+        let stdin = std::io::stdin();
+        let buf = BufReader::new(stdin);
+        let calendars = Calendar::parse(buf).unwrap();
+        print_events(calendars.iter());
+    };
+
+    if is_stdin_empty {
+        if args[1] == "--keep-alive".to_string() {
+            println!("{}", "First argument must be a FILE.".red());
+            println!("{}", help_text);
+            return;
+        };
+        if ["-h".to_string(), "help".to_string(), "--help".to_string()].contains(&args[1]) {
+            println!("{}", help_text);
+            return;
+        };
+        if args.len() > 2 {
+            keep_alive = args[2] == "--keep-alive".to_string();
+        }
+        let file = File::open(&args[1]).unwrap();
+        let buf = BufReader::new(file);
+        let calendars = Calendar::parse(buf).unwrap();
+        print_events(calendars.iter());
+    };
+
+    let running = Arc::new(AtomicBool::new(keep_alive));
+    let r = running.clone();
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Error setting Ctrl-C handler");
+    while running.load(Ordering::SeqCst) {}
 }
