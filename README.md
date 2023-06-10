@@ -2,7 +2,7 @@
 
 **Calio** is a tiny CLI tool that helps to visualize iCal file in the terminal.
 
-![CALIO](calio.png)
+![CALIO](https://github.com/oscarmcm/calio/blob/main/calio.png?raw=true)
 
 ## Installation
 
