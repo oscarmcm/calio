@@ -1,14 +1,14 @@
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
-use chrono::Duration;
-use colored::Colorize;
 use almanac::Calendar;
 use almanac::Date;
 use almanac::Event;
+use chrono::Duration;
+use colored::Colorize;
 
 fn print_day(date: Date) {
     println!("\n{}", date.format("%a %b %e %Y").green().bold())
@@ -95,8 +95,8 @@ fn print_events(events: impl Iterator<Item = Event>) {
 }
 
 fn main() {
-
-    let help_text: String = format!(r"
+    let help_text: String = format!(
+        r"
 {} 1.0.0
 Tiny CLI tool that helps to visualize iCal file content in the terminal.
 
@@ -111,9 +111,14 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
 {}:
     cat ~/invite.ics | calio
     calio ~/invite.ics --keep-alive
-", "calio".green(), "USAGE:".yellow(), "OPTIONS:".yellow(), "--keep-alive".green(), "--help".green(), "EXAMPLE".yellow());
-
-
+",
+        "calio".green(),
+        "USAGE:".yellow(),
+        "OPTIONS:".yellow(),
+        "--keep-alive".green(),
+        "--help".green(),
+        "EXAMPLE".yellow()
+    );
 
     let args: Vec<_> = env::args().collect();
     let is_stdin_empty: bool = atty::is(atty::Stream::Stdin);
@@ -165,6 +170,7 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
     let r = running.clone();
     ctrlc::set_handler(move || {
         r.store(false, Ordering::SeqCst);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
     while running.load(Ordering::SeqCst) {}
 }
