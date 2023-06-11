@@ -1,6 +1,7 @@
 use std::env;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -160,9 +161,30 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
         if args.len() > 2 {
             keep_alive = args[2] == "--keep-alive".to_string();
         }
-        let file = File::open(&args[1]).unwrap();
-        let buf = BufReader::new(file);
-        let calendars = Calendar::parse(buf).unwrap();
+
+        let path = Path::new(&args[1]);
+        let calendars = if path.exists() {
+            let file = File::open(path).unwrap();
+            let buf = BufReader::new(file);
+            Calendar::parse(buf).unwrap()
+        } else {
+            // Print out a message while the calendar gets downloaded
+            let s = format!(
+                "{}{}",
+                "Fetching calendar from ".dimmed(),
+                &args[1].dimmed()
+            );
+            print!("{}", s);
+            // Download the calendar from the given URL
+            let url_text = reqwest::blocking::get(&args[1]).unwrap().text().unwrap();
+            // Clear the printed message with \r
+            // https://stackoverflow.com/a/35280799/14555505
+            print!("\r{: <1$}", "", s.len());
+            // Convert the url to a buffered reader
+            let buf = BufReader::new(url_text.as_bytes());
+            // Convert the buffered reader to a Calendar
+            Calendar::parse(buf).unwrap()
+        };
         print_events(calendars.iter());
     };
 
