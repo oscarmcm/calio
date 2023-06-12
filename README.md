@@ -16,7 +16,6 @@ cargo install calio
 
 Then you'll be able to run `calio` from whichever directory you're in.
 
-
 ## How-To
 
 **Calio** is easy to use, just provide a file path or stdin to read the
@@ -31,6 +30,7 @@ And also comes with the following options:
 
 ```
 --keep-alive  Keep the app running and do not exit on stdout.
+--hide-desc   Don't show the event's description.
 -h, --help    Print help information.
 ```
 
