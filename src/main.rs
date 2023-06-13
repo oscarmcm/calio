@@ -103,12 +103,12 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
 
 {}
     [STDIN] | calio [OPTIONS]
-    calio [FILE_PATH] [OPTIONS]
+    calio [FILE_PATH | ICS_URL] [OPTIONS]
 
 {}:
-    {}    Keep the app running and do not exit on stdout.
-    {}          Display this message and exit.
+    {}    Keep the cli running and do not exit on stdout.
     {}     Don't show the event's description.
+    {}          Display this message and exit.
 
 {}:
     cat ~/invite.ics | calio
@@ -189,7 +189,7 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
             // Convert the buffered reader to a Calendar
             Calendar::parse(buf).unwrap()
         };
-        print_events(calendars.iter());
+        print_events(calendars.iter(), hide_desc);
     };
 
     let running = Arc::new(AtomicBool::new(keep_alive));
