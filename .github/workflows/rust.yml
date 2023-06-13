@@ -63,7 +63,7 @@ jobs:
       run: find dist/
     - name: Create release
       id: create_release
-      uses: actions/create-release@v1.0.0
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -72,7 +72,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload linux release asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -81,7 +81,7 @@ jobs:
         asset_name: calio-linux-x86_64
         asset_content_type: application/x-elf
     - name: Upload macos release asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -90,7 +90,7 @@ jobs:
         asset_name: calio-darwin-x86_64
         asset_content_type: application/x-mach-binary
     - name: Upload windows release asset
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
