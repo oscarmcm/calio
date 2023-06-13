@@ -45,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - name: Checkout code
       uses: actions/checkout@v1
     - uses: actions/download-artifact@v1
@@ -59,18 +60,21 @@ jobs:
       with:
         name: calio-windows-latest
         path: dist/calio-windows-latest
+
     - name: List release files
       run: find dist/
+
     - name: Create release
       id: create_release
-      uses: actions/create-release@v1
+      uses: elgohr/Github-Release-Action@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        #tag_name: ${{ github.ref }}
+        title: Release ${{ github.ref }}
+        #draft: false
+        #prerelease: false
+
     - name: Upload linux release asset
       uses: actions/upload-release-asset@v1
       env:
@@ -80,6 +84,7 @@ jobs:
         asset_path: ./dist/calio-ubuntu-latest/calio
         asset_name: calio-linux-x86_64
         asset_content_type: application/x-elf
+
     - name: Upload macos release asset
       uses: actions/upload-release-asset@v1
       env:
@@ -89,6 +94,7 @@ jobs:
         asset_path: ./dist/calio-macOS-latest/calio
         asset_name: calio-darwin-x86_64
         asset_content_type: application/x-mach-binary
+
     - name: Upload windows release asset
       uses: actions/upload-release-asset@v1
       env:
