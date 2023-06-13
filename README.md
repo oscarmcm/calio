@@ -31,6 +31,7 @@ And also comes with the following options:
 
 ```
 --keep-alive  Keep the app running and do not exit on stdout.
+--hide-desc   Don't show the event's description.
 -h, --help    Print help information.
 ```
 

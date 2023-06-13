@@ -15,7 +15,7 @@ fn print_day(date: Date) {
     println!("\n{}", date.format("%a %b %e %Y").green().bold())
 }
 
-fn print_event(event: &Event, ustart: bool, uend: bool) {
+fn print_event(event: &Event, ustart: bool, uend: bool, hide_desc: bool) {
     let start = if ustart {
         "-----".to_string()
     } else {
@@ -41,13 +41,13 @@ fn print_event(event: &Event, ustart: bool, uend: bool) {
         event.location.purple()
     );
 
-    if !event.description.is_empty() {
+    if !hide_desc && !event.description.is_empty() {
         let description = str::replace(&event.description, "\\n", &format!("\n{}", " ".repeat(16)));
         println!("{}{}", " ".repeat(16), description.cyan());
     }
 }
 
-fn print_events(events: impl Iterator<Item = Event>) {
+fn print_events(events: impl Iterator<Item = Event>, hide_desc: bool) {
     let mut day = Date::new();
     let mut unfinish: Vec<Event> = vec![];
 
@@ -60,9 +60,9 @@ fn print_events(events: impl Iterator<Item = Event>) {
                     for (i, event) in unfinish.clone().iter().enumerate() {
                         if event.end_date() <= day + Duration::days(1) {
                             unfinish.remove(i);
-                            print_event(event, true, false);
+                            print_event(event, true, false, hide_desc);
                         } else {
-                            print_event(event, true, true);
+                            print_event(event, true, true, hide_desc);
                         }
                     }
                 }
@@ -73,10 +73,10 @@ fn print_events(events: impl Iterator<Item = Event>) {
         }
 
         if event.end_date() > event.start + Duration::days(1) {
-            print_event(&event, false, true);
+            print_event(&event, false, true, hide_desc);
             unfinish.push(event);
         } else {
-            print_event(&event, false, false);
+            print_event(&event, false, false, hide_desc);
         }
     }
 
@@ -86,9 +86,9 @@ fn print_events(events: impl Iterator<Item = Event>) {
         for (i, event) in unfinish.clone().iter().enumerate() {
             if event.end_date() <= day + Duration::days(1) {
                 unfinish.remove(i);
-                print_event(event, true, false);
+                print_event(event, true, false, hide_desc);
             } else {
-                print_event(event, true, true);
+                print_event(event, true, true, hide_desc);
             }
         }
     }
@@ -108,22 +108,26 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
 {}:
     {}    Keep the app running and do not exit on stdout.
     {}          Display this message and exit.
+    {}     Don't show the event's description.
 
 {}:
     cat ~/invite.ics | calio
     calio ~/invite.ics --keep-alive
+    calio ~/invite.ics --hide-desc
 ",
         "calio".green(),
         "USAGE:".yellow(),
         "OPTIONS:".yellow(),
         "--keep-alive".green(),
         "--help".green(),
+        "--hide-desc".green(),
         "EXAMPLE".yellow()
     );
 
     let args: Vec<_> = env::args().collect();
     let is_stdin_empty: bool = atty::is(atty::Stream::Stdin);
     let mut keep_alive: bool = false;
+    let hide_desc = args.iter().any(|arg| arg == "--hide-desc");
 
     if is_stdin_empty && args.len() < 2 {
         // no args no stdin
@@ -145,7 +149,7 @@ Tiny CLI tool that helps to visualize iCal file content in the terminal.
         let stdin = std::io::stdin();
         let buf = BufReader::new(stdin);
         let calendars = Calendar::parse(buf).unwrap();
-        print_events(calendars.iter());
+        print_events(calendars.iter(), hide_desc);
     };
 
     if is_stdin_empty {
