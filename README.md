@@ -23,6 +23,7 @@ ics contents:
 
 ```
 calio /some/file/path/cal.ics
+calio https://gist.githubusercontent.com/DeMarko/6142417/raw/1cd301a5917141524b712f92c2e955e86a1add19/sample.ics
 cat /some/file/path.cal.ics | calio
 ```
 
