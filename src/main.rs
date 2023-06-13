@@ -98,7 +98,7 @@ fn print_events(events: impl Iterator<Item = Event>, hide_desc: bool) {
 fn main() {
     let help_text: String = format!(
         r"
-{} 1.0.0
+{} 1.1.0
 Tiny CLI tool that helps to visualize iCal file content in the terminal.
 
 {}
